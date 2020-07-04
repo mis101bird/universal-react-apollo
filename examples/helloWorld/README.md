@@ -15,3 +15,5 @@ npm start
 ```
 
 Now that your universal app is running at `http://localhost:3000/greeting/visitor`
+
+You can check module server endpoint `http://localhost:3000/module`

@@ -15,7 +15,11 @@ import {
  * @param {ReactElement} appElement: Application main React Element
  * @param {Object} inMemoryCacheConfig apollo client InMemoryCache constructor config object (available options: https://www.apollographql.com/docs/react/advanced/caching/#configuration) - optional
  */
-export default function clientRender(appElement, inMemoryCacheConfig) {
+export default function clientRender(
+  appElement,
+  inMemoryCacheConfig,
+  moduleStateIds = []
+) {
   // create apollo client
   const client = new ApolloClient({
     link: createHttpLink({
@@ -23,7 +27,10 @@ export default function clientRender(appElement, inMemoryCacheConfig) {
       credentials: "same-origin"
     }),
     cache: new InMemoryCache(inMemoryCacheConfig).restore(
-      window[REHYDRATION_STATE_DATA_KEY]
+      Object.assign(
+        window[REHYDRATION_STATE_DATA_KEY] || {},
+        ...moduleStateIds.map(id => window[REHYDRATION_STATE_DATA_KEY] || {})
+      )
     ),
     defaultOptions: {
       watchQuery: {

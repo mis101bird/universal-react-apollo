@@ -8,6 +8,7 @@ import { ApolloProvider } from "@apollo/react-hooks";
 import { renderToStringWithData, getDataFromTree } from "@apollo/react-ssr";
 
 import Html from "./Html";
+import Module from "./Module";
 
 /**
  * Return a function which is responsible for fetching all required states via graphql operations and render application with them in server side
@@ -20,7 +21,8 @@ import Html from "./Html";
 export default function createServerRender({
   typeDefs,
   resolvers,
-  schemaDirectives
+  schemaDirectives,
+  isModule = false
 }) {
   // create Apollo client
   const schema = makeExecutableSchema({
@@ -28,6 +30,89 @@ export default function createServerRender({
     resolvers,
     schemaDirectives
   });
+
+  if (isModule) {
+    /**
+     * Module level server render function
+     * @param {Object} options
+     * @param {Object} options.dataSources GQL data sources object
+     * @param {Object} options.context context object which will be shared across all resolvers
+     * @param {Function} options.appElement: A function called with the current request that returns a React Element which will be placed in the <body>
+     * @param {Object} options.req Express request object
+     * @param {Object} options.cache GQL data source cache config object - optional
+     */
+    return async ({
+      moduleId,
+      rehydrationStateKey,
+      dataSources,
+      cache,
+      context,
+      appElement,
+      req
+    }) => {
+      if (!moduleId) throw Error("require moduleId");
+
+      // initialize the data source, required for Apollo RESTDataSource
+      for (const dataSource of Object.values(dataSources)) {
+        if (typeof dataSource.initialize === "function") {
+          dataSource.initialize({
+            context,
+            cache
+          });
+        }
+      }
+
+      // prepare apollo client
+      const apolloClientOptions = {
+        ssrMode: true,
+        link: new SchemaLink({
+          schema,
+          context: {
+            ...context,
+            dataSources
+          }
+        }),
+        cache: new InMemoryCache(),
+        defaultOptions: {
+          watchQuery: {
+            errorPolicy: "all"
+          },
+          query: {
+            errorPolicy: "all"
+          },
+          mutate: {
+            errorPolicy: "all"
+          }
+        }
+      };
+
+      const client = new ApolloClient(apolloClientOptions);
+      // client for ssr only (no need to do data extraction)
+      const ssrClient = new ApolloClient(apolloClientOptions);
+
+      // wrapping main component with Apollo Provider
+      const appWithApollo = (
+        <ApolloProvider client={client}>
+          {typeof appElement === "function" && appElement({ req })}
+        </ApolloProvider>
+      );
+
+      const app = await renderToStringWithData(appWithApollo);
+
+      const initialState = client.extract();
+      const moduleHtml = (
+        <Module
+          moduleId={moduleId}
+          rehydrationStateKey={rehydrationStateKey || moduleId}
+          content={app}
+          initialState={initialState}
+          inlineStateNonce={req.nonce}
+        />
+      );
+
+      return ReactDOMServer.renderToStaticMarkup(moduleHtml);
+    };
+  }
 
   /**
    * Server render function
