@@ -10,8 +10,9 @@ const GET_MESSAGE = gql`
   }
 `
 
-const App = () => {
-  const { data } = useQuery(GET_MESSAGE)
+const App = ({ client }) => {
+  let options = !!client ? { client } : {} 
+  const { data } = useQuery(GET_MESSAGE, options)
   return (
     <div>
       <h1>{data.greeting && data.greeting.content}</h1>

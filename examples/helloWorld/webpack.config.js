@@ -1,7 +1,8 @@
 module.exports = {
   mode: 'production',
   entry: {
-    'home': './src/clientEntry'
+    'home': './src/clientEntry',
+    'module': './src/moduleClientEntry'
   },
   output: {
     filename: '[name].js',

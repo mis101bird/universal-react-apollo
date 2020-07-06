@@ -43,5 +43,15 @@ export default [
     },
     external,
     plugins
+  },
+  {
+    input: 'src/getModuleClient.js',
+    output: {
+      file: 'lib/getModuleClient.js',
+      format: 'esm',
+      sourcemap: true
+    },
+    external,
+    plugins
   }
 ]

@@ -35,6 +35,7 @@ export default function createServerRender({
     /**
      * Module level server render function
      * @param {Object} options
+     * @param {Object} options.moduleId id for re-hydrate module's state
      * @param {Object} options.dataSources GQL data sources object
      * @param {Object} options.context context object which will be shared across all resolvers
      * @param {Function} options.appElement: A function called with the current request that returns a React Element which will be placed in the <body>
@@ -43,14 +44,13 @@ export default function createServerRender({
      */
     return async ({
       moduleId,
-      rehydrationStateKey,
       dataSources,
       cache,
       context,
       appElement,
       req
     }) => {
-      if (!moduleId) throw Error("require moduleId");
+      if (!moduleId) throw Error("moduleId is required!");
 
       // initialize the data source, required for Apollo RESTDataSource
       for (const dataSource of Object.values(dataSources)) {
@@ -103,7 +103,7 @@ export default function createServerRender({
       const moduleHtml = (
         <Module
           moduleId={moduleId}
-          rehydrationStateKey={rehydrationStateKey || moduleId}
+          rehydrationStateKey={moduleId}
           content={app}
           initialState={initialState}
           inlineStateNonce={req.nonce}

@@ -10,6 +10,8 @@ import resolvers from "./gql/resolvers";
 import messageApi from "./gql/dataSources/messageApi";
 import webpackConfig from "../webpack.config";
 
+const MODULE_ID = 'MODULE_1'
+
 const app = express();
 const compiler = webpack(webpackConfig);
 
@@ -29,14 +31,14 @@ const initModuleServer = (app, apolloServerOptions) => {
 
   app.get("/module/:userName", (req, res, next) => {
     return moduleRender({
+      moduleId: MODULE_ID,
       appElement: () => <HomeApp />,
-      moduleId: "MODULE_1",
       req,
       dataSources: dataSources(),
       context: context({ req })
     }).then((markup) => {
       res.status(200);
-      res.send(markup);
+      res.send(markup + '<script src="/module.js"></script>');
     });
   });
 };
