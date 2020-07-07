@@ -141,3 +141,26 @@ Hydrate the universal app container (reuse server-side generated HTML content an
 | bodyBottomElement  | (optional) A function called with current request that returns a React element you want to render into the bottom of `<body>` tag when the given path is matched    |
 | middlewareChain    | (optional) An array of express middleware function                                                                                                                  |
 | responseStatusCode | (optional) The http status code of response (defaults to 200)                                                                                                       |
+
+### createServerRender({ typeDefs, resolvers, schemaDirectives, isModule })
+
+This function will return an async function to get html in server-side render.
+
+*arguments:*
+
+|      arg      |                                                                        description                                                                                             |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------                                                                     
+| apolloOptions | [Apollo server configuration options](https://www.apollographql.com/docs/apollo-server/api/apollo-server/#parameters)
+| apolloOptions.isModule | true: For module level render; false: For page level render. Default is false.
+
+### getModuleClient(moduleId, httpLinkConfig, inMemoryCacheConfig)
+
+This function will return the module's apollo client with server side prefetched state in client side.
+
+*arguments:*
+
+|      arg      |                                                                        description                                                                                             |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------                                                                     
+| moduleId | The module id for identity
+| httpLinkConfig | apollo-link-http constructor config object (available options: https://www.apollographql.com/docs/link/links/http/#options)
+| inMemoryCacheConfig | apollo client InMemoryCache constructor config object (available options: https://www.apollographql.com/docs/react/advanced/caching/#configuration)                 |

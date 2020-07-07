@@ -45,11 +45,11 @@ const initModuleServer = (app, apolloServerOptions) => {
 
 const routes = [
   {
-    path: "/greeting/:userName",
+    path: '/greeting/:userName',
     appElement: () => <HomeApp />,
-    bodyBottomElement: ({ req }) => <script src='/home.js' />,
-  },
-];
+    bodyBottomElement: ({ req }) => (<script src="/home.js"></script>)
+  }
+]
 
 const apolloOptions = {
   typeDefs,
